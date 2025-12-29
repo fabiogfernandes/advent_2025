@@ -31,27 +31,59 @@ func parseRange(rangeString string) (int, int) {
 	return rangeStart, rangeEnd
 }
 
+func isRepeatedLengthSequence(numberString string, length int) bool {
+	if len(numberString)%length != 0 {
+		return false
+	}
+	for i := length; i <= len(numberString)-1; i += length {
+		// fmt.Println("Compare", numberString[0:length], numberString[i:i+length])
+		if numberString[0:length] != numberString[i:i+length] {
+			return false
+		}
+	}
+	return true
+}
+
+func repeatedSequence(numberString string) bool {
+	for repSeqLength := 1; repSeqLength <= len(numberString)/2; repSeqLength++ {
+		if isRepeatedLengthSequence(numberString, repSeqLength) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func main() {
+
 	ranges := readRangesFile("puzzle_input2.txt")
-	// numberString, firstHalf, secondHalf := "", "", ""
 	numberString := ""
 	middleIndex := 0
-	invalidsSum := 0
-	// convErr1, convErr2 = nil, nil
+	invalidsSum, invalidsSum2 := 0, 0
 
 	for _, r := range ranges {
 		rangeStart, rangeEnd := parseRange(r)
 		// fmt.Printf("%d - %d \n", rangeStart, rangeEnd)
-		for i := rangeStart; i <= rangeEnd; i++ {
-			numberString = strconv.Itoa(i)
+		for n := rangeStart; n <= rangeEnd; n++ {
+
+			numberString = strconv.Itoa(n)
+
+			// Part 1 solution
 			if len(numberString)%2 == 0 {
 				middleIndex = len(numberString) / 2
 				if numberString[0:middleIndex] == numberString[middleIndex:] {
 					// fmt.Println("Invalid: ", numberString)
-					invalidsSum += i
+					invalidsSum += n
 				}
+			}
+
+			// Part 2 solution
+			if repeatedSequence(numberString) {
+				invalidsSum2 += n
+				// fmt.Println("Invalid: ", numberString)
 			}
 		}
 	}
-	fmt.Println("Invalid IDs sum: ", invalidsSum)
+	fmt.Println("Invalid IDs Part 1 sum: ", invalidsSum)
+	fmt.Println("Invalid IDs Part 2 sum: ", invalidsSum2)
 }
