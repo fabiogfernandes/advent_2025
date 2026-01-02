@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -47,6 +48,11 @@ func readIngredientsDBFile(filename string) ([][]int, []int, error) {
 	return freshIngredientRanges, ingredients, nil
 }
 
+type RangePoint struct {
+	value   int
+	isStart bool
+}
+
 func main() {
 	freshIngredientRanges, ingredients, err := readIngredientsDBFile("puzzle_input2.txt")
 	if err != nil {
@@ -67,8 +73,66 @@ func main() {
 			validIngredients += 1
 		}
 	}
+	fmt.Println("Sum of valid ingredients:", validIngredients)
 
 	// Part 2
+	// Computation takes too long
+	// freshIngredients := make(map[int]int)
+	// fmt.Println("Number of ranges:", len(freshIngredientRanges))
 
-	fmt.Println("Sum of valid ingredients:", validIngredients)
+	// for _, freshIngredient := range freshIngredientRanges {
+	// 	fmt.Println("Range start:", freshIngredient[0], "Range end:", freshIngredient[1])
+	// 	for i := freshIngredient[0]; i <= freshIngredient[1]; i++ {
+	// 		fmt.Println("i:", i)
+	// 		freshIngredients[i] = i
+	// 	}
+	// }
+
+	mergedRanges := [][]int{}
+	rangePoints := []RangePoint{}
+	for _, freshIngredientRange := range freshIngredientRanges {
+		rangePoints = append(rangePoints, RangePoint{value: freshIngredientRange[0], isStart: true})
+		rangePoints = append(rangePoints, RangePoint{value: freshIngredientRange[1], isStart: false})
+	}
+
+	sort.Slice(rangePoints, func(i, j int) bool {
+		if rangePoints[i].value == rangePoints[j].value {
+			return rangePoints[i].isStart
+		} else {
+			return rangePoints[i].value < rangePoints[j].value
+		}
+	})
+
+	fmt.Println("rangePoints:", rangePoints)
+	// sort.Slice(rangePoints, func(i, j) bool {
+	// 	return rangePoints[i].value < rangePoints[j].value
+	// })
+
+	rangeCounter := 0
+	currentRange := []int{}
+	for _, rp := range rangePoints {
+		if rp.isStart {
+			if rangeCounter == 0 {
+				currentRange = append(currentRange, rp.value)
+			}
+			rangeCounter++
+		} else {
+			rangeCounter--
+			if rangeCounter == 0 {
+				currentRange = append(currentRange, rp.value)
+				mergedRanges = append(mergedRanges, currentRange)
+				currentRange = []int{}
+			}
+		}
+	}
+	freshIngredients := 0
+	for _, mr := range mergedRanges {
+		freshIngredients += (mr[1] - mr[0] + 1)
+	}
+
+	fmt.Println("freshIngredientRanges:", freshIngredientRanges)
+	fmt.Println()
+	fmt.Println("merged ranges:", mergedRanges)
+	fmt.Println()
+	fmt.Println("Number of fresh ingredients:", freshIngredients)
 }
