@@ -25,12 +25,12 @@ func readIngredientsDBFile(filename string) ([][]int, []int, error) {
 	}
 	defer file.Close()
 
-	var fresh_ingredients [][]int
+	var freshIngredientRanges [][]int
 	var ingredients []int
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() && scanner.Text() != "" {
 		rangeStart, rangeEnd := parseRange(scanner.Text())
-		fresh_ingredients = append(fresh_ingredients, []int{rangeStart, rangeEnd})
+		freshIngredientRanges = append(freshIngredientRanges, []int{rangeStart, rangeEnd})
 	}
 	for scanner.Scan() {
 		ingredient, convErr := strconv.Atoi(scanner.Text())
@@ -44,20 +44,21 @@ func readIngredientsDBFile(filename string) ([][]int, []int, error) {
 		return nil, nil, err
 	}
 
-	return fresh_ingredients, ingredients, nil
+	return freshIngredientRanges, ingredients, nil
 }
 
 func main() {
-	fresh_ingredients, ingredients, err := readIngredientsDBFile("puzzle_input2.txt")
+	freshIngredientRanges, ingredients, err := readIngredientsDBFile("puzzle_input2.txt")
 	if err != nil {
 		panic(err)
 	}
 
+	// Part 1
 	validIngredients := 0
 	for _, ingredient := range ingredients {
 		isValid := false
-		for _, fresh_ingredient := range fresh_ingredients {
-			if ingredient >= fresh_ingredient[0] && ingredient <= fresh_ingredient[1] {
+		for _, freshIngredient := range freshIngredientRanges {
+			if ingredient >= freshIngredient[0] && ingredient <= freshIngredient[1] {
 				isValid = true
 				break
 			}
@@ -66,6 +67,8 @@ func main() {
 			validIngredients += 1
 		}
 	}
+
+	// Part 2
 
 	fmt.Println("Sum of valid ingredients:", validIngredients)
 }
